@@ -55,3 +55,13 @@ async def request_classification(request: Request):
             "classification_scores": json.dumps(classification_scores),
         },
     )
+
+# New feature: Image Transformation
+@app.get("/transform", response_class=HTMLResponse)
+def transform_form(request: Request):
+    """
+    Renders a form to select an image and specify transformation parameters.
+    """
+    return templates.TemplateResponse(
+        "transform_select.html", {"request": request, "images": list_images()}
+    )
