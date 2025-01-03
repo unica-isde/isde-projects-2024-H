@@ -1,8 +1,9 @@
 import json
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from app.transformation_utils import transform_image
 from app.config import Configuration
 from app.forms.classification_form import ClassificationForm
 from app.ml.classification_utils import classify_image
@@ -64,4 +65,36 @@ def transform_form(request: Request):
     """
     return templates.TemplateResponse(
         "transform_select.html", {"request": request, "images": list_images()}
+    )
+
+@app.post("/transform")
+async def transform_post(
+    request: Request,
+    image_id: str = Form(...),
+    brightness: float = Form(1.0),
+    contrast: float = Form(1.0),
+    color: float = Form(1.0),
+    sharpness: float = Form(1.0),
+):
+    """
+    Handles the POST request for applying image transformations.
+    Delegates processing to the `transform_image` function.
+    """
+    # Call the helper function to apply transformations
+    transformed_image_url = transform_image(
+        image_id=image_id,
+        brightness=brightness,
+        contrast=contrast,
+        color=color,
+        sharpness=sharpness,
+    )
+
+    # Return the result page with the transformed image
+    return templates.TemplateResponse(
+        "transform_output.html",
+        {
+            "request": request,
+            "image_id": image_id,
+            "transformed_image_url": transformed_image_url,
+        },
     )
