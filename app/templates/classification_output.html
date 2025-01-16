@@ -16,8 +16,8 @@
         <div class="col">
             <div class="card">
                 <img class="large-front-thumbnail"
-                     src="{{ 'static/imagenet_subset/'+image_id }} "
-                     alt={{ image_id }}/>
+                    src="{% if 'static/imagenet_subset/' + image_id in images %}static/imagenet_subset/{{ image_id }}{% else %}static/user_images/{{ image_id }}{% endif %}"
+                    alt="{{ image_id }}"/>
             </div>
         </div>
         <div class="col">
