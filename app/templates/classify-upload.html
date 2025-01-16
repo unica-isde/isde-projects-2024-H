@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1>Select Model and Image</h1>
+    <form method="post" novalidate>
+        <h4>
+            Model:
+        </h4>
+        <p>
+            <select name="model_id">
+                {% for model in models %}
+                  <option value="{{ model }}" SELECTED>{{ model }}</option>
+                {% endfor %}     
+              </select>
+        </p>
+        <h4>
+            Image:
+        </h4>
+        <p>
+            <input type="file" name="image_file" accept="image/*" class="form-control-file">
+        </p>
+        <button type="submit" class="btn btn-dark mb-2">Submit</button>
+    </form>
+{% endblock %}

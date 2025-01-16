@@ -8,6 +8,7 @@ from app.config import Configuration
 from app.forms.classification_form import ClassificationForm
 from app.ml.classification_utils import classify_image
 from app.utils import list_images
+import os
 
 
 app = FastAPI()
@@ -16,6 +17,8 @@ config = Configuration()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
+UPLOAD_FOLDER = "app/static/images"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.get("/info")
 def info() -> dict[str, list[str]]:
@@ -32,6 +35,33 @@ def home(request: Request):
     """The home page of the service."""
     return templates.TemplateResponse("home.html", {"request": request})
 
+
+
+# New feature : image upload
+@app.post("/upload-img")
+async def upload_image(request: Request, image: bytes = Form(...)):
+    """Uploads an image file to the server."""
+    # Get the filename from the form
+    form = ClassificationForm(request)
+    await form.load_data()
+    image_id = form.image_id
+    filename = f"{UPLOAD_FOLDER}/{image_id}.jpg"
+
+    # Write the image to a file
+    with open(filename, "wb") as f:
+        f.write(image)
+
+    # Return the image ID
+    return {"image_id": image_id}
+
+@app.get("/classify-upload", response_class=HTMLResponse)
+def upload_form(request: Request):
+    """
+    Renders a form to select an image and specify transformation parameters.
+    """
+    return templates.TemplateResponse(
+        "classify-upload.html", {"request": request, "models": Configuration.models}
+    )
 
 @app.get("/classifications")
 def create_classify(request: Request):
