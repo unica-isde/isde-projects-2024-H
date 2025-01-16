@@ -37,9 +37,9 @@ def home(request: Request):
 
 
 # New feature : image upload
-@app.post("/classify-upload")
+@app.post("/classify_upload")
 async def upload_image(request: Request, model_id: str = Form(...), image_file: UploadFile = File(...)):
-    """Uploads an image file to the server."""
+    """Uploads an image file to the server, and classifies it using the specified model."""
     path = "custom"
     # Save the uploaded file
     file_path = os.path.join(UPLOAD_FOLDER, image_file.filename)
@@ -58,13 +58,13 @@ async def upload_image(request: Request, model_id: str = Form(...), image_file: 
         },
     )
 
-@app.get("/classify-upload", response_class=HTMLResponse)
+@app.get("/classify_upload", response_class=HTMLResponse)
 def upload_form(request: Request):
     """
     Renders a form to select an image and specify transformation parameters.
     """
     return templates.TemplateResponse(
-        "classify-upload.html", {"request": request, "models": Configuration.models}
+        "classify_upload.html", {"request": request, "models": Configuration.models}
     )
 
 @app.get("/classifications")
