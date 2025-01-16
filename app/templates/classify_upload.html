@@ -1,25 +1,34 @@
 {% extends "base.html" %}
 
 {% block content %}
-
+<div class="container mt-5">
     <h1>Select Model and Image</h1>
     <form method="post" enctype="multipart/form-data">
-        <h4>
-            Model:
-        </h4>
-        <p>
-            <select name="model_id">
+        <div class="form-group">
+            <label for="model_id">Model:</label>
+            <select name="model_id" id="model_id" class="form-control">
                 {% for model in models %}
-                  <option value="{{ model }}" SELECTED>{{ model }}</option>
-                {% endfor %}     
-              </select>
-        </p>
-        <h4>
-            Image:
-        </h4>
-        <p>
-            <input type="file" name="image_file" accept="image/*" class="form-control-file">
-        </p>
+                    <option value="{{ model }}">{{ model }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="image_file">Image:</label>
+            <div class="custom-file">
+                <input type="file" name="image_file" id="image_file" accept="image/*" class="custom-file-input">
+                <label class="custom-file-label" for="image_file">Choose file</label>
+            </div>
+        </div>
         <button type="submit" class="btn btn-dark mb-2">Upload and classify</button>
     </form>
+</div>
+
+<script>
+    // Update the label of the file input with the selected file name
+    document.querySelector('.custom-file-input').addEventListener('change', function(e) {
+        var fileName = document.getElementById("image_file").files[0].name;
+        var nextSibling = e.target.nextElementSibling;
+        nextSibling.innerText = fileName;
+    });
+</script>
 {% endblock %}
