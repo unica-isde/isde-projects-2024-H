@@ -3,7 +3,7 @@
 {% block content %}
 
     <h1>Select Model and Image</h1>
-    <form method="post" novalidate>
+    <form method="post" enctype="multipart/form-data">
         <h4>
             Model:
         </h4>
@@ -20,6 +20,6 @@
         <p>
             <input type="file" name="image_file" accept="image/*" class="form-control-file">
         </p>
-        <button type="submit" class="btn btn-dark mb-2">Submit</button>
+        <button type="submit" class="btn btn-dark mb-2">Upload and classify</button>
     </form>
 {% endblock %}

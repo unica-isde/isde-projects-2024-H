@@ -1,5 +1,5 @@
 import json
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, File, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -17,8 +17,8 @@ config = Configuration()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
-UPLOAD_FOLDER = "app/static/images"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+UPLOAD_FOLDER = "app/static/imagenet_subset"
+#os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.get("/info")
 def info() -> dict[str, list[str]]:
@@ -36,23 +36,26 @@ def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
 
 
-
 # New feature : image upload
-@app.post("/upload-img")
-async def upload_image(request: Request, image: bytes = Form(...)):
+@app.post("/classify-upload")
+async def upload_image(request: Request, model_id: str = Form(...), image_file: UploadFile = File(...)):
     """Uploads an image file to the server."""
-    # Get the filename from the form
-    form = ClassificationForm(request)
-    await form.load_data()
-    image_id = form.image_id
-    filename = f"{UPLOAD_FOLDER}/{image_id}.jpg"
+    # Save the uploaded file
+    file_path = os.path.join(UPLOAD_FOLDER, image_file.filename)
+    with open(file_path, "wb") as buffer:
+        buffer.write(await image_file.read())
 
-    # Write the image to a file
-    with open(filename, "wb") as f:
-        f.write(image)
 
-    # Return the image ID
-    return {"image_id": image_id}
+    # Use the saved file for classification
+    classification_scores = classify_image(model_id=model_id, img_id=image_file.filename)
+    return templates.TemplateResponse(
+        "classification_output.html",
+        {
+            "request": request,
+            "image_id": image_file.filename,
+            "classification_scores": json.dumps(classification_scores),
+        },
+    )
 
 @app.get("/classify-upload", response_class=HTMLResponse)
 def upload_form(request: Request):
