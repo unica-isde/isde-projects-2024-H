@@ -17,8 +17,8 @@ config = Configuration()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
-UPLOAD_FOLDER = "app/static/imagenet_subset"
-#os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+UPLOAD_FOLDER = "app/static/user_images"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.get("/info")
 def info() -> dict[str, list[str]]:
@@ -40,14 +40,15 @@ def home(request: Request):
 @app.post("/classify-upload")
 async def upload_image(request: Request, model_id: str = Form(...), image_file: UploadFile = File(...)):
     """Uploads an image file to the server."""
+    path = "custom"
     # Save the uploaded file
     file_path = os.path.join(UPLOAD_FOLDER, image_file.filename)
+
     with open(file_path, "wb") as buffer:
         buffer.write(await image_file.read())
 
-
     # Use the saved file for classification
-    classification_scores = classify_image(model_id=model_id, img_id=image_file.filename)
+    classification_scores = classify_image(model_id=model_id, img_id=image_file.filename, path=path)
     return templates.TemplateResponse(
         "classification_output.html",
         {
@@ -80,7 +81,7 @@ async def request_classification(request: Request):
     await form.load_data()
     image_id = form.image_id
     model_id = form.model_id
-    classification_scores = classify_image(model_id=model_id, img_id=image_id)
+    classification_scores = classify_image(model_id=model_id, img_id=image_id, path="default")
     return templates.TemplateResponse(
         "classification_output.html",
         {

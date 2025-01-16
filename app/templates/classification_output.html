@@ -16,7 +16,7 @@
         <div class="col">
             <div class="card">
                 <img class="large-front-thumbnail"
-                     src="{{ 'static/imagenet_subset/'+image_id }} "
+                     src="{{ 'static/imagenet_subset/'+image_id or 'static/user_images/'+image_id}} "
                      alt={{ image_id }}/>
             </div>
         </div>
