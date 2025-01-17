@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Image histogram</h1>
+    <h4>
+        Image:
+    </h4>
+    <p>
+        <select name="image_id">
+            {% for image in images %}
+              <option value="{{ image }}" SELECTED>{{ image }}</option>
+            {% endfor %}
+          </select>
+    </p>
+    <button type="button" id="submit-btn">Get histogram</button>
+    <img class="large-front-thumbnail" id="img-thumbnail"/>
+
+
+</div>
+
+    <script src="/app/static/histogram.js"></script>
+
+{% endblock %}
