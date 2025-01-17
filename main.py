@@ -35,6 +35,12 @@ def home(request: Request):
     """The home page of the service."""
     return templates.TemplateResponse("home.html", {"request": request})
 
+# New feature : image histogram
+@app.get("/histogram", response_class=HTMLResponse)
+def home(request: Request):
+    """The home page of the service."""
+    return templates.TemplateResponse("histogram.html", {"request": request, "images": list_images()})
+
 
 # New feature : image upload
 @app.post("/classify_upload")
