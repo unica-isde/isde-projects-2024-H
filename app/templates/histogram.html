@@ -4,21 +4,29 @@
 <div class="container mt-5">
     <h1>Image histogram</h1>
     <h4>
-        Image:
+        Choose an image:
     </h4>
     <p>
-        <select name="image_id">
+        <select name="image_id" id="image_id" class="form-control">
             {% for image in images %}
               <option value="{{ image }}" SELECTED>{{ image }}</option>
             {% endfor %}
-          </select>
+        </select>
     </p>
-    <button type="button" id="submit-btn">Get histogram</button>
-    <img class="large-front-thumbnail" id="img-thumbnail"/>
-
+    <button type="button" id="submit-btn" class="btn btn-dark mb-4" >Get histogram</button>
+    <div class="container" id="img-container">
+      <div class="row">
+        <div class="col-sm">
+          <img class="large-front-thumbnail" id="img-thumbnail" height="300"/>
+        </div>
+        <div class="col-sm">
+          <canvas id="canvas-histogram" width="512" height="300"></canvas>
+        </div>
+      </div>
+    </div>
 
 </div>
 
-    <script src="/app/static/histogram.js"></script>
+    <script src="{{ "static/histogram.js" }}"</script>
 
 {% endblock %}
