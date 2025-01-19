@@ -61,6 +61,7 @@ async def upload_image(request: Request, model_id: str = Form(...), image_file: 
             "request": request,
             "image_id": image_file.filename,
             "classification_scores": json.dumps(classification_scores),
+            "img_path": f"/static/user_images/{image_file.filename}",
         },
     )
 
@@ -94,6 +95,7 @@ async def request_classification(request: Request):
             "request": request,
             "image_id": image_id,
             "classification_scores": json.dumps(classification_scores),
+            "img_path": f"/static/imagenet_subset/{image_id}",
         },
     )
 
