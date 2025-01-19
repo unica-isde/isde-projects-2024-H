@@ -17,6 +17,7 @@ config = Configuration()
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
+# Set up a folder for storing user-uploaded images
 UPLOAD_FOLDER = "app/static/user_images"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -38,7 +39,7 @@ def home(request: Request):
 # New feature : image histogram
 @app.get("/histogram", response_class=HTMLResponse)
 def home(request: Request):
-    """The home page of the service."""
+    """This page allows the user to generate a color histogram of an image."""
     return templates.TemplateResponse("histogram.html", {"request": request, "images": list_images()})
 
 
@@ -68,7 +69,7 @@ async def upload_image(request: Request, model_id: str = Form(...), image_file: 
 @app.get("/classify_upload", response_class=HTMLResponse)
 def upload_form(request: Request):
     """
-    Renders a form to select an image and specify transformation parameters.
+    Renders a form to select an image to upload, and specify transformation model to use.
     """
     return templates.TemplateResponse(
         "classify_upload.html", {"request": request, "models": Configuration.models}
@@ -76,6 +77,9 @@ def upload_form(request: Request):
 
 @app.get("/classifications")
 def create_classify(request: Request):
+    """
+    This page allows classification of an image chosen in a preset folder, along with a model.
+    """
     return templates.TemplateResponse(
         "classification_select.html",
         {"request": request, "images": list_images(), "models": Configuration.models},
@@ -84,6 +88,11 @@ def create_classify(request: Request):
 
 @app.post("/classifications")
 async def request_classification(request: Request):
+    """
+        POST request to classify an image using a specified model.
+        Takes the image ID and model ID from the form data as parameters,
+        and returns the classification results HTML page.
+    """
     form = ClassificationForm(request)
     await form.load_data()
     image_id = form.image_id
@@ -104,7 +113,7 @@ async def download_results(scores: str):
     """
     Endpoint to download classification scores as JSON.
     """
-    # Convert the string directly to a Python dictionary
+    # Convert the results string into a JSON object
     scores_dict = json.loads(scores)
 
     # Return a JSON response with the appropriate headers for downloading
