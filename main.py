@@ -1,6 +1,6 @@
 import json
 from fastapi import FastAPI, Request, Form, File, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from app.transform_utils import transform_image
@@ -61,6 +61,7 @@ async def upload_image(request: Request, model_id: str = Form(...), image_file: 
             "request": request,
             "image_id": image_file.filename,
             "classification_scores": json.dumps(classification_scores),
+            "img_path": f"/static/user_images/{image_file.filename}",
         },
     )
 
@@ -94,7 +95,22 @@ async def request_classification(request: Request):
             "request": request,
             "image_id": image_id,
             "classification_scores": json.dumps(classification_scores),
+            "img_path": f"/static/imagenet_subset/{image_id}",
         },
+    )
+
+@app.get("/download_results")
+async def download_results(scores: str):
+    """
+    Endpoint to download classification scores as JSON.
+    """
+    # Convert the string directly to a Python dictionary
+    scores_dict = json.loads(scores)
+
+    # Return a JSON response with the appropriate headers for downloading
+    return JSONResponse(
+        content=scores_dict,
+        headers={"Content-Disposition": "attachment; filename=results.json"},
     )
 
 # New feature: Image Transformation
