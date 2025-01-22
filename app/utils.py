@@ -19,7 +19,7 @@ def list_images():
 # helper function to save uploaded files
 UPLOAD_FOLDER = "app/static/user_images"
 # List of allowed file extensions and MIME types
-ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "bmp"}
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp"}
 ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/gif", "image/bmp"}
 
 def allowed_file(filename: str, content_type: str) -> bool:

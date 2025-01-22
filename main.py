@@ -67,7 +67,7 @@ async def upload_image(request: Request, model_id: str = Form(...), image_file: 
     try:
         # Save the uploaded file with a unique name and classify
         file_path, new_filename = await save_uploaded_file(image_file)
-        classification_scores = await classify_image(model_id=model_id, img_id=new_filename, path=path)
+        classification_scores = classify_image(model_id=model_id, img_id=new_filename, path=path)
 
         # Return the result page with the classification scores
         return templates.TemplateResponse(
@@ -76,7 +76,7 @@ async def upload_image(request: Request, model_id: str = Form(...), image_file: 
                 "request": request,
                 "image_id": new_filename,
                 "classification_scores": json.dumps(classification_scores),
-                "img_path": f"/static/uploads/{new_filename}",
+                "img_path": f"/static/user_images/{new_filename}",
             },
         )
 
