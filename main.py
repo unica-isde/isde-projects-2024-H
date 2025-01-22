@@ -2,7 +2,7 @@ import asyncio
 import json
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, Form, File, UploadFile
+from fastapi import FastAPI, Request, Form, File, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -62,20 +62,27 @@ def home(request: Request):
 async def upload_image(request: Request, model_id: str = Form(...), image_file: UploadFile = File(...)):
     """Uploads an image file to the server, and classifies it using the specified model."""
     path = "custom"
-    # Save the uploaded file with a unique name
-    file_path, new_filename = await save_uploaded_file(image_file)
+    try:
+        # Save the uploaded file with a unique name
+        file_path, new_filename = await save_uploaded_file(image_file)
 
-    # Use the saved file for classification
-    classification_scores = classify_image(model_id=model_id, img_id=new_filename, path=path)
-    return templates.TemplateResponse(
-        "classification_output.html",
-        {
-            "request": request,
-            "image_id": image_file.filename,
-            "classification_scores": json.dumps(classification_scores),
-            "img_path": f"/static/user_images/{new_filename}",
-        },
-    )
+        # Use the saved file for classification
+        classification_scores = await classify_image(model_id=model_id, img_id=new_filename, path=path)
+
+        # Return the result page with the classification scores
+        return templates.TemplateResponse(
+            "classification_output.html",
+            {
+                "request": request,
+                "image_id": new_filename,
+                "classification_scores": json.dumps(classification_scores),
+                "img_path": f"/static/uploads/{new_filename}",
+            },
+        )
+
+    except HTTPException as e:
+        # Handle HTTP exceptions and return an error response
+        return HTMLResponse(content=e.detail, status_code=e.status_code)
 
 @app.get("/classify_upload", response_class=HTMLResponse)
 def upload_form(request: Request):

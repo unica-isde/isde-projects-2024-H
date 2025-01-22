@@ -2,7 +2,7 @@ import asyncio
 import os
 import time
 import aiofiles
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 
 from app.config import Configuration
 
@@ -18,25 +18,47 @@ def list_images():
 
 # helper function to save uploaded files
 UPLOAD_FOLDER = "app/static/user_images"
+# List of allowed file extensions and MIME types
+ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "bmp"}
+ALLOWED_MIME_TYPES = {"image/jpeg", "image/png", "image/gif", "image/bmp"}
+
+def allowed_file(filename: str, content_type: str) -> bool:
+    """Check if the file has an allowed extension and MIME type."""
+    _, file_extension = os.path.splitext(filename)
+    return file_extension.lower() in ALLOWED_EXTENSIONS and content_type in ALLOWED_MIME_TYPES
+
 async def save_uploaded_file(image_file: UploadFile) -> tuple[str, str]:
-    # Get the original filename
-    original_filename = image_file.filename
+    """
+    This method saves the user uploaded file with a unique name, and returns the file path and new filename.
+    """
+    try:
+        # Get the original filename and content type
+        original_filename = image_file.filename
+        content_type = image_file.content_type
 
-    # Get the current Unix epoch time
-    epoch_time = int(time.time())
+        # Validate the file
+        if not allowed_file(original_filename, content_type):
+            raise HTTPException(status_code=400, detail="Invalid file type. Only image files are allowed.")
 
-    # Modify the filename to include the original filename and the Unix epoch time
-    filename, file_extension = os.path.splitext(original_filename)
-    new_filename = f"{filename}_{epoch_time}{file_extension}"
+        # Get the current Unix epoch time
+        epoch_time = int(time.time())
 
-    # Construct the full file path
-    file_path = os.path.join(UPLOAD_FOLDER, new_filename)
+        # Modify the filename to include the original filename and the Unix epoch time
+        filename, file_extension = os.path.splitext(original_filename)
+        new_filename = f"{filename}_{epoch_time}{file_extension}"
 
-    # Save the file
-    async with aiofiles.open(file_path, "wb") as buffer:
-        await buffer.write(await image_file.read())
+        # Construct the full file path
+        file_path = os.path.join(UPLOAD_FOLDER, new_filename)
 
-    return file_path, new_filename
+        # Save the file
+        async with aiofiles.open(file_path, "wb") as buffer:
+            await buffer.write(await image_file.read())
+
+        return file_path, new_filename
+
+    except Exception as e:
+        # Handle any exceptions that occur during the file upload process
+        raise HTTPException(status_code=400, detail=f"Error uploading file: {str(e)}")
 
 # helper function to remove old user uploaded files
 async def delete_old_files():
