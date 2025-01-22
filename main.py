@@ -60,13 +60,13 @@ def home(request: Request):
 # New feature : image upload
 @app.post("/classify_upload")
 async def upload_image(request: Request, model_id: str = Form(...), image_file: UploadFile = File(...)):
-    """Uploads an image file to the server, and classifies it using the specified model."""
+    """Uploads an image file to the server, and classifies it using the specified model.
+    Exception are caught gracefully in case the user is being mischievous and uploads a non-image file.
+    """
     path = "custom"
     try:
-        # Save the uploaded file with a unique name
+        # Save the uploaded file with a unique name and classify
         file_path, new_filename = await save_uploaded_file(image_file)
-
-        # Use the saved file for classification
         classification_scores = await classify_image(model_id=model_id, img_id=new_filename, path=path)
 
         # Return the result page with the classification scores

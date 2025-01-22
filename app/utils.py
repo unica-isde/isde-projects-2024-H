@@ -30,6 +30,8 @@ def allowed_file(filename: str, content_type: str) -> bool:
 async def save_uploaded_file(image_file: UploadFile) -> tuple[str, str]:
     """
     This method saves the user uploaded file with a unique name, and returns the file path and new filename.
+    Returns:
+        tuple[str, str]: The file path and the new filename
     """
     try:
         # Get the original filename and content type
@@ -62,6 +64,7 @@ async def save_uploaded_file(image_file: UploadFile) -> tuple[str, str]:
 
 # helper function to remove old user uploaded files
 async def delete_old_files():
+    """Helper function to delete files older than a certain age."""
     while True:
         # Define the maximum age of files in seconds
         max_age = 3600  # 1 hour
