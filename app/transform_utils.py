@@ -1,5 +1,7 @@
-from PIL import Image, ImageEnhance
+from PIL import ImageEnhance, Image
 import os
+import base64
+from io import BytesIO
 
 # Directory to store transformed images
 UPLOAD_FOLDER = "app/static/uploads"
@@ -17,7 +19,7 @@ def transform_image(image_id: str, brightness: float, contrast: float, color: fl
     - sharpness: Adjusts the sharpness (default = 1.0).
 
     Returns:
-    - Relative URL of the transformed image.
+    - BAse64 encoded version of the transformed image.
     """
     # Validate the selected image exists
     image_path = os.path.join("app/static/imagenet_subset", image_id)
@@ -48,13 +50,14 @@ def transform_image(image_id: str, brightness: float, contrast: float, color: fl
             enhancer = ImageEnhance.Sharpness(image)
             image = enhancer.enhance(sharpness)
 
-            # Save the transformed image
-            transformed_filename = f"transformed_{image_id}"
-            transformed_path = os.path.join(UPLOAD_FOLDER, transformed_filename)
-            image.save(transformed_path)
+            # Convert the image to a base64 string
+            buffered = BytesIO()
+            image.save(buffered, format="JPEG")
+            img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+            print(img_str)
 
     except Exception as e:
         raise RuntimeError(f"Error processing the image: {e}")
 
-    # Return the relative URL of the transformed image
-    return f"/static/uploads/{transformed_filename}"
+    # Return the base64 of the transformed image
+    return img_str

@@ -146,7 +146,7 @@ async def transform_post(
     Delegates processing to the `transform_image` function.
     """
     # Call the helper function to apply transformations
-    transformed_image_url = transform_image(
+    transformed_image_b64 = transform_image(
         image_id=image_id,
         brightness=brightness,
         contrast=contrast,
@@ -160,6 +160,6 @@ async def transform_post(
         {
             "request": request,
             "image_id": image_id,
-            "transformed_image_url": transformed_image_url,
+            "transformed_image_b64": transformed_image_b64,
         },
     )
