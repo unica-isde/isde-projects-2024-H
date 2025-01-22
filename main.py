@@ -1,4 +1,7 @@
+import asyncio
 import json
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request, Form, File, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -7,11 +10,21 @@ from app.transform_utils import transform_image
 from app.config import Configuration
 from app.forms.classification_form import ClassificationForm
 from app.ml.classification_utils import classify_image
-from app.utils import list_images
+from app.utils import list_images, save_uploaded_file, delete_old_files
 import os
 
-
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Start the background task
+    task = asyncio.create_task(delete_old_files())
+    yield
+    # Shutdown: Cancel the background task
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+app = FastAPI(lifespan=lifespan)
 config = Configuration()
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
@@ -20,6 +33,7 @@ templates = Jinja2Templates(directory="app/templates")
 # Set up a folder for storing user-uploaded images
 UPLOAD_FOLDER = "app/static/user_images"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 
 @app.get("/info")
 def info() -> dict[str, list[str]]:
@@ -48,21 +62,18 @@ def home(request: Request):
 async def upload_image(request: Request, model_id: str = Form(...), image_file: UploadFile = File(...)):
     """Uploads an image file to the server, and classifies it using the specified model."""
     path = "custom"
-    # Save the uploaded file
-    file_path = os.path.join(UPLOAD_FOLDER, image_file.filename)
-
-    with open(file_path, "wb") as buffer:
-        buffer.write(await image_file.read())
+    # Save the uploaded file with a unique name
+    file_path, new_filename = await save_uploaded_file(image_file)
 
     # Use the saved file for classification
-    classification_scores = classify_image(model_id=model_id, img_id=image_file.filename, path=path)
+    classification_scores = classify_image(model_id=model_id, img_id=new_filename, path=path)
     return templates.TemplateResponse(
         "classification_output.html",
         {
             "request": request,
             "image_id": image_file.filename,
             "classification_scores": json.dumps(classification_scores),
-            "img_path": f"/static/user_images/{image_file.filename}",
+            "img_path": f"/static/user_images/{new_filename}",
         },
     )
 
