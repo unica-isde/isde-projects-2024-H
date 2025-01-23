@@ -16,8 +16,8 @@
         <div class="col">
             <div class="card">
                 <img class="large-front-thumbnail"
-                     src="{{ 'static/imagenet_subset/'+image_id }} "
-                     alt={{ image_id }}/>
+                    src="{{ img_path }}"
+                    alt="{{ image_id }}"/>
             </div>
         </div>
         <div class="col">
@@ -30,8 +30,23 @@
                     </div>
                 </div>
                 <a class="btn btn-primary" href="/classifications" role="button">Back</a>
+                <a class="btn btn-primary" href="/download_results?scores={{ classification_scores }}" role="button">Download Results</a>
+                <a id="downloadPlot" class="btn btn-primary" href="#" role="button">Download Plot</a>
         </div>
     </div>
     <script src="{{ "static/graph.js" }}" id="makeGraph" classification_scores="{{classification_scores}}"></script>
+    <script>
+        // Wait for the graph.js script to generate the plot
+        window.onload = function() {
+            const canvas = document.getElementById("classificationOutput");
+            const downloadButton = document.getElementById("downloadPlot");
+
+            // Make sure the plot is drawn on the canvas before setting the download link
+            if (canvas) {
+                downloadButton.href = canvas.toDataURL("image/png");
+                downloadButton.download = "classification_plot.png"; // Set the file name
+            }
+        };
+    </script>
 {% endblock %}
 

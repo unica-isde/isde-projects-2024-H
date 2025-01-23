@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+    <!-- Original Image -->
+    <div class="col">
+        <div class="card">
+            <h3 class="card-header text-center">Original Image</h3>
+            <img class="large-front-thumbnail"
+                 src="{{ 'static/imagenet_subset/'+image_id }}"
+                 alt="{{ image_id }}">
+        </div>
+    </div>
+
+    <!-- Transformed Image -->
+    <div class="col">
+        <div class="card">
+            <h3 class="card-header text-center">Transformed Image</h3>
+            <img class="large-front-thumbnail"
+                 src="data:image/jpeg;base64,{{ transformed_image_b64 }}"
+                 alt="Transformed {{ image_id }}">
+        </div>
+        <div class="text-center mt-3">
+            <!-- Back Button -->
+            <a class="btn btn-primary" href="/transform" role="button">Back</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
